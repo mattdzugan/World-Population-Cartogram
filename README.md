@@ -90,24 +90,13 @@ X,   Y,   CountryCode, LowerLeft, UpperRight, IncludeInSquares
 
 ## 👩‍💻 Using The Data (Example Code)
 
-### Python
-<details>
-<summary>Click to Expand for Sample Python Code</summary>
-
-`TODO TODO TODO`
-
-</details>
-
 ### R
-<details>
-<summary>Click to Expand for Sample R Code</summary>
 
-#### Hello World (literally)
-```r
+```R
 library(data.table)
 library(ggplot2)
-bordersDT <- fread('./data/year_2018__cell_500k/squares/borders.csv')
-cellsDT   <- fread('./data/year_2018__cell_500k/squares/cells.csv')
+cellsDT   <- fread('https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares_and_triangles/cells.csv')
+bordersDT <- fread('https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares_and_triangles/borders.csv')
 
 ggplot()+
   theme_void()+
@@ -117,59 +106,69 @@ ggplot()+
   coord_fixed()
 ```
 
-#### A Better Way to See Country Data
-```r
-library(data.table)
-library(ggplot2)
-library(wbstats)
-library(countrycode)
-cellsDT   <- fread('./data/year_2018__cell_500k/squares/cells.csv')
+### Python
+```Python
+import numpy as np
+import pandas as pd
+from matplotlib.collections import PatchCollection
+import matplotlib
+import matplotlib.pyplot as plt
 
-my_indicators <- c(fert = "SP.DYN.TFRT.IN")
-d <- as.data.table(wb_data(my_indicators, start_date = 2000, gapfill = TRUE, mrv = 20))
-cellsDT <- merge(cellsDT, d[date==2018, ], by.x='CountryCodeAlpha', by.y='iso3c', all.x=TRUE)
+borders = pd.read_csv("https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares_and_triangles/borders.csv")
+cells   = pd.read_csv("https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares_and_triangles/cells.csv")
 
-ggplot()+
-  theme_void()+
-  geom_tile(data=cellsDT,   aes(x=X+0.5, y=Y+0.5, fill=fert), color=NA)+
-  coord_fixed()+
-  labs(title = 'Fertility Rate by Country')
+fig = plt.figure()
+ax = fig.add_subplot(111, aspect='equal')
+plt.xlim([0, max(cells["X"]+1)])
+plt.ylim([0, max(cells["Y"]+1)])
+n=cells.shape[0]
+patches = []
+for i in range(0,n):
+    patches.append(matplotlib.patches.Rectangle((cells.loc[i,"X"], cells.loc[i,"Y"]),1,1))
+ax.add_collection(PatchCollection(patches, color="#111111", alpha=0.1))
+for p in np.unique(borders["PolygonID"]):
+    ax.plot(borders.loc[borders["PolygonID"]==p, "X"], borders.loc[borders["PolygonID"]==p, "Y"])
+plt.show()
 ```
-
-#### Monte Carlo as a Viz is now Super Easy
-```r
-library(data.table)
-library(ggplot2)
-library(wbstats)
-library(countrycode)
-cellsDT   <- fread('./data/year_2018__cell_500k/squares/cells.csv')
-bordersDT <- fread('./data/year_2018__cell_500k/squares/borders.csv')
-
-my_indicators <- c(,int = "IT.NET.BBND.P2")
-d <- as.data.table(wb_data(my_indicators, start_date = 2000, gapfill = TRUE, mrv = 20))
-cellsDT <- merge(cellsDT, d[date==2018, ], by.x='CountryCodeAlpha', by.y='iso3c', all.x=TRUE)
-
-cellsDT$rand <- runif(nrow(cellsDT))
-cellsDT[, hasInternet := 100*rand<int]
-ggplot()+
-  theme_void()+
-  geom_tile(data=cellsDT,   aes(x=X+0.5, y=Y+0.5, fill=hasInternet), color=NA)+
-  geom_path(data=bordersDT, aes(x=X, y=Y, group=PolygonID), color="#2d3436")+
-  coord_fixed()+
-  labs(title = 'Proportion of Country with High-Speed Broadband')
-```
-
-
-</details>
 
 ### D3.js
+```js
+cells = d3.csv("https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares/cells.csv", function(d){
+  return {
+    X : +d.X,
+    Y : +d.Y,
+    Country : d.CountryCode,
+  };
+})
 
-<details>
-<summary>Click to Expand for Sample D3.js Code</summary>
+const xmin   = d3.min(cells, d => d.X);
+const xmax   = d3.max(cells, d => d.X)+1;
+const ymin   = d3.min(cells, d => d.Y);
+const ymax   = d3.max(cells, d => d.Y)+1;
+const height = width/(xmax-xmin)*(ymax-ymin);
+const svg    = d3.create("svg")
+                 .attr("viewBox", [0, 0, width, height])
+                 .style("background", "#ffffff");
 
-`TODO TODO TODO`
+var x     = d3.scaleLinear().domain([xmin, xmax]).range([0, width]);
+var y     = d3.scaleLinear().domain([ymin, ymax]).range([height, 0]);
+var color = d3.scaleOrdinal(['#7F3C8D','#11A579','#3969AC','#F2B701','#E73F74',
+                             '#80BA5A','#E68310','#008695','#CF1C90','#f97b72','#4b4b8f']);
 
-</details>
+const cell = svg.selectAll("rect")
+                .data(cells)
+                .enter()
+                .append("rect")
+                .attr("x", d => x(d.X))
+                .attr("y", d => y(d.Y+1))
+                .style("stroke-width",1)
+                .style("stroke", d => color(d.Country))
+                .style("fill", d => color(d.Country))
+                .attr("height",y(0)-y(1))
+                .attr("width",x(1)-x(0));
+```
+
+
 
 ## 📖 About this Repo
 Certainly the main feature of this repository is the set of artifacts housed in the `data/` folder.
