@@ -237,3 +237,6 @@ The 2018 data is a future projection that the UN Population Division created las
 Other data – the US in 1776, the population of various metropolitan areas, and the population of some small countries – are mostly from Wikipedia.
 
 Our World In Data [copyrights their work](https://ourworldindata.org/how-to-use-our-world-in-data#how-is-our-work-copyrighted) under a [CC-BY license](https://creativecommons.org/licenses/by/4.0/legalcode).
+
+## License
+[CC-BY](https://creativecommons.org/licenses/by/4.0/)
