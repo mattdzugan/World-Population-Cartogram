@@ -12,81 +12,6 @@ Good cartograms are notoriously difficult to make, as they require a careful bal
 Here's a small gallery of graphics I made using this cartogram layout:
 <img src="./img/demo.gif">
 
-## 🔢 About the Data and its Format
-
-### The Square Grid
-The cartogram is composed ~15,000 square* cells within a grid.  Each cell represents a population of 500,000 (0.5M) people who reside in its corresponding country.  This means that the only information necessary to represent the **World Population Cartogram** is a list of tuples: `{X, Y, Country}` describing which cells map to which countries.  To avoid dealing with spelling mismatches and other localization glitches, this repo uses [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country codes to identify countries.
-
-#### cells.csv
-For example, the following 11 rows represent the 4.7M people (9 cells) of New Zealand (`ISO: 554`) and the 0.9M people (2 cells) of Fiji (`ISO: 242`)
-```
-X,    Y,    CountryCode
-337,  0,    554
-338,  1,    554
-338,  0,    554
-339,  2,    554
-339,  1,    554
-340,  5,    554
-340,  4,    554
-340,  3,    554
-341,  4,    554
-340,  9,    242
-340,  8,    242
-...
-```
-
-#### borders.csv
-For convenience, the aggregate polygons are also computed (using `computeBoundaries.py`) & written to a CSV file which looks like this:
-```
-X,    Y,   PolygonID, CountryCode, BorderType
-...
-163,  63,  295,       262,         Exterior
-163,  64,  295,       262,         Exterior
-164,  64,  295,       262,         Exterior
-164,  63,  295,       262,         Exterior
-166,  25,  296,       480,         Exterior
-166,  24,  296,       480,         Exterior
-165,  24,  296,       480,         Exterior
-...
-```
-Needing to describe a `BorderType` as either `Exterior` or `Interior` may come as a surprise to you. If so, please checkout [South Africa & Lesotho](https://ourworldindata.org/uploads/2018/09/Population-cartogram_Africa-768x925.png). South Africa, therefore has two `PolygonID` associated with it. One `Exterior` border, and one `Interior` border.
-
-It should be noted that the borders are not `cells` themselves. They do not "take up space". They are merely just zero-width representations of the perimeters of each country.
-
-#### Cells & Borders Playing Together
-`cells.csv` can be thought of as descriptions of the pixels that make up the cartogram. `borders.csv` describe the perimeters that lie around groups of pixels.
-
-Using them together introduces one slight complication:
-Each `cell` is technically a region itself, a 1x1 rectangle.  The `cells.csv` however only represents it as a single `{X,Y}` point.  **The convention here is that a `cell`'s `{X,Y}` coordinate is specifically referring to its lower-left (south-west) corner.**  For example, a single-`cell` Country at `{X=100, Y=200}` would have a `border` of `[{X=100, Y=200}, {X=101, Y=200}, {X=101, Y=201}, {X=100, Y=201}]`
-
-
-
-### Triangles...?
-Because of the fact that there are a handful of (mostly island) nations with a population less than the 500,000 cell-size, these countries being represented by a full square cell can be a little misleading.  Max Roser's Cartogram addresses this by carving out a special type of cell just for this, a half-filled cell in the shape of a triangle.  Just look in the [Carribean](https://ourworldindata.org/uploads/2018/09/Population-cartogram_Americas-768x978.png) or the [South-Pacific](https://ourworldindata.org/uploads/2018/09/Population-cartogram_Asia-and-Oceania-768x531.png) for a few examples of these triangles.
-
-In my view, while the triangles are cute, I personally prefer the aesthetic that you get from all-squares.
-Plus, the triangles don't really help all that much in making the area directly proportional to population.
-<img src="./img/populationplot__year_2018__cell_500k.png">
-
-Because it really just comes down to personal preference, two versions of the data are made available. One in `data/*/squares/` and the other in  `data/*/squares_and_triangles/`.  That way, you can choose whichever you prefer!
-
-The `borders.csv` file behaves the same way in the `data/*/squares_and_triangles/` directory as it does in the `data/*/squares/` directory, explained above.  There is a slight difference when handling `cells.csv` however.
-
-Because a single square-cell can now contain two triangles, we need a way to identify that. Thus, `boolean` columns: `LowerLeft` and `UpperRight` are introduced.
-```
-X,   Y,   CountryCode, LowerLeft, UpperRight, IncludeInSquares
-165, 24,  480,         1,         1,          1
-166, 25,  480,         1,         1,          1
-127, 36,  678,         0,         1,          1
-133, 102, 380,         1,         0,          0
-...
-```
-* a row where both `LowerLeft==1` & `UpperRight==1` is a square
-* a row where only 1 of `LowerLeft==1` or `UpperRight==1` is a triangle
-* a row where `IncludeInSquares==0` is not included as a square in `/squares/cells.csv` file
-    * this is very rare, the only instances are the portions of `Italy` that are replaced by squares for `Vatican City` and `San Marino`
-
-
 
 ## 👩‍💻 Using The Data (Example Code)
 
@@ -166,6 +91,85 @@ const cell = svg.selectAll("rect")
                 .attr("height",y(0)-y(1))
                 .attr("width",x(1)-x(0));
 ```
+
+
+
+## 🔢 About the Data and its Format
+
+### The Square Grid
+The cartogram is composed ~15,000 square* cells within a grid.  Each cell represents a population of 500,000 (0.5M) people who reside in its corresponding country.  This means that the only information necessary to represent the **World Population Cartogram** is a list of tuples: `{X, Y, Country}` describing which cells map to which countries.  To avoid dealing with spelling mismatches and other localization glitches, this repo uses [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country codes to identify countries.
+
+#### cells.csv
+For example, the following 11 rows represent the 4.7M people (9 cells) of New Zealand (`ISO: 554`) and the 0.9M people (2 cells) of Fiji (`ISO: 242`)
+```
+X,    Y,    CountryCode
+337,  0,    554
+338,  1,    554
+338,  0,    554
+339,  2,    554
+339,  1,    554
+340,  5,    554
+340,  4,    554
+340,  3,    554
+341,  4,    554
+340,  9,    242
+340,  8,    242
+...
+```
+
+#### borders.csv
+For convenience, the aggregate polygons are also computed (using `computeBoundaries.py`) & written to a CSV file which looks like this:
+```
+X,    Y,   PolygonID, CountryCode, BorderType
+...
+163,  63,  295,       262,         Exterior
+163,  64,  295,       262,         Exterior
+164,  64,  295,       262,         Exterior
+164,  63,  295,       262,         Exterior
+166,  25,  296,       480,         Exterior
+166,  24,  296,       480,         Exterior
+165,  24,  296,       480,         Exterior
+...
+```
+Needing to describe a `BorderType` as either `Exterior` or `Interior` may come as a surprise to you. If so, please checkout [South Africa & Lesotho](https://ourworldindata.org/uploads/2018/09/Population-cartogram_Africa-768x925.png). South Africa, therefore has two `PolygonID` associated with it. One `Exterior` border, and one `Interior` border.
+
+It should be noted that the borders are not `cells` themselves. They do not "take up space". They are merely just zero-width representations of the perimeters of each country.
+
+#### Cells & Borders Playing Together
+`cells.csv` can be thought of as descriptions of the pixels that make up the cartogram. `borders.csv` describe the perimeters that lie around groups of pixels.
+
+Using them together introduces one slight complication:
+Each `cell` is technically a region itself, a 1x1 rectangle.  The `cells.csv` however only represents it as a single `{X,Y}` point.  **The convention here is that a `cell`'s `{X,Y}` coordinate is specifically referring to its lower-left (south-west) corner.**  For example, a single-`cell` Country at `{X=100, Y=200}` would have a `border` of `[{X=100, Y=200}, {X=101, Y=200}, {X=101, Y=201}, {X=100, Y=201}]`
+
+
+
+### Triangles...?
+Because of the fact that there are a handful of (mostly island) nations with a population less than the 500,000 cell-size, these countries being represented by a full square cell can be a little misleading.  Max Roser's Cartogram addresses this by carving out a special type of cell just for this, a half-filled cell in the shape of a triangle.  Just look in the [Carribean](https://ourworldindata.org/uploads/2018/09/Population-cartogram_Americas-768x978.png) or the [South-Pacific](https://ourworldindata.org/uploads/2018/09/Population-cartogram_Asia-and-Oceania-768x531.png) for a few examples of these triangles.
+
+In my view, while the triangles are cute, I personally prefer the aesthetic that you get from all-squares.
+Plus, the triangles don't really help all that much in making the area directly proportional to population.
+<img src="./img/populationplot__year_2018__cell_500k.png">
+
+Because it really just comes down to personal preference, two versions of the data are made available. One in `data/*/squares/` and the other in  `data/*/squares_and_triangles/`.  That way, you can choose whichever you prefer!
+
+The `borders.csv` file behaves the same way in the `data/*/squares_and_triangles/` directory as it does in the `data/*/squares/` directory, explained above.  There is a slight difference when handling `cells.csv` however.
+
+Because a single square-cell can now contain two triangles, we need a way to identify that. Thus, `boolean` columns: `LowerLeft` and `UpperRight` are introduced.
+```
+X,   Y,   CountryCode, LowerLeft, UpperRight, IncludeInSquares
+165, 24,  480,         1,         1,          1
+166, 25,  480,         1,         1,          1
+127, 36,  678,         0,         1,          1
+133, 102, 380,         1,         0,          0
+...
+```
+* a row where both `LowerLeft==1` & `UpperRight==1` is a square
+* a row where only 1 of `LowerLeft==1` or `UpperRight==1` is a triangle
+* a row where `IncludeInSquares==0` is not included as a square in `/squares/cells.csv` file
+    * this is very rare, the only instances are the portions of `Italy` that are replaced by squares for `Vatican City` and `San Marino`
+
+
+
 
 
 
