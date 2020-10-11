@@ -1,4 +1,4 @@
-# 🗺️ World Population Cartogram 
+# 🗺️ World Population Cartogram
 This repository contains a set of data able to reproduce [Max Roser](https://github.com/OurWorldInData-User)'s beautiful masterpiece for "Our World in Data" -- The World Population Cartogram.
 
 <img src="https://ourworldindata.org/uploads/2018/09/Population-cartogram_World-2-e1538912000147-1536x587.png">
@@ -6,18 +6,18 @@ This repository contains a set of data able to reproduce [Max Roser](https://git
 From Wikipedia:
 > A cartogram is a map in which some thematic mapping variable – such as travel time, population, or GNP – is substituted for land area or distance
 
-Good cartograms are notoriously difficult to make, as they require a careful balance of distorting distance, area, & shape -- enough to match the target variable, but not too much causing the countires to become unrecognizable.  For this reason, cartograms that are generated purely algorithmically are generally of low quality.  Hence my motivation for this repo.  **Max Roser's map is fantastic and should be available for anyone and everyone to easily build upon.**  In fact, it's so good, it's the first image in the [wikipedia entry for "cartogram"](https://en.wikipedia.org/wiki/Cartogram).
+Good cartograms are notoriously difficult to make, as they require a careful balance of distorting distance, area, & shape -- enough to match the target variable, but not too much causing the countries to become unrecognizable.  For this reason, cartograms that are generated purely algorithmically are generally of low quality.  Hence my motivation for this repo.  **Max Roser's map is fantastic and should be available for anyone and everyone to easily build upon.**  In fact, it's so good, it's the first image in the [wikipedia entry for "cartogram"](https://en.wikipedia.org/wiki/Cartogram).
 
-Here's a small gallery of graphics I made using this catrogram layout:
+Here's a small gallery of graphics I made using this cartogram layout:
 <img src="./img/demo.gif">
 
-## 🔢 About the Data and its Format 
+## 🔢 About the Data and its Format
 
 ### The Square Grid
 The cartogram is composed ~15,000 square* cells within a grid.  Each cell represents a population of 500,000 (0.5M) people who reside in its corresponding country.  This means that the only information necessary to represent the **World Population Cartogram** is a list of tuples: `{X, Y, Country}` describing which cells map to which countries.  To avoid dealing with spelling mismatches and other localization glitches, this repo uses [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country codes to identify countries.
 
 #### cells.csv
-For example, the following 11 rows represent the 4.7M people (9 cells) of New Zealand (`ISO: 554`) and the 0.9M people (2 cells) of Fiji (`ISO: 242`) 
+For example, the following 11 rows represent the 4.7M people (9 cells) of New Zealand (`ISO: 554`) and the 0.9M people (2 cells) of Fiji (`ISO: 242`)
 ```
 X,    Y,    CountryCode
 337,  0,    554
@@ -53,10 +53,10 @@ Needing to describe a `BorderType` as either `Exterior` or `Interior` may come a
 It should be noted that the borders are not `cells` themselves. They do not "take up space". They are merely just zero-width representations of the perimeters of each country.
 
 #### Cells & Borders Playing Together
-`cells.csv` can be thought of as descriptions of the pixels that make up the cartogram. `borders.csv` describe the perimeters that lie around groups of pixels. 
+`cells.csv` can be thought of as descriptions of the pixels that make up the cartogram. `borders.csv` describe the perimeters that lie around groups of pixels.
 
 Using them together introduces one slight complication:
-Each `cell` is technically a region itself, a 1x1 rectangle.  The `cells.csv` however only represents it as a single `{X,Y}` point.  **The convention here is that a `cell`'s `{X,Y}` coordinate is specifically referring to its lower-left (south-west) corner.**  For example, a single-`cell` Country at `{X=100, Y=200}` would have a `border` of `[{X=100, Y=200}, {X=101, Y=200}, {X=101, Y=201}, {X=100, Y=201}]` 
+Each `cell` is technically a region itself, a 1x1 rectangle.  The `cells.csv` however only represents it as a single `{X,Y}` point.  **The convention here is that a `cell`'s `{X,Y}` coordinate is specifically referring to its lower-left (south-west) corner.**  For example, a single-`cell` Country at `{X=100, Y=200}` would have a `border` of `[{X=100, Y=200}, {X=101, Y=200}, {X=101, Y=201}, {X=100, Y=201}]`
 
 
 
@@ -67,7 +67,7 @@ In my view, while the triangles are cute, I personally prefer the aesthetic that
 Plus, the triangles don't really help all that much in making the area directly proportional to population.
 <img src="./img/populationplot__year_2018__cell_500k.png">
 
-Because it really just comes down to personal preference, two versions of the data are made available. One in `data/*/squares/` and the other in  `data/*/squares_and_triangles/`.  That way, you can choose whicever you prefer!
+Because it really just comes down to personal preference, two versions of the data are made available. One in `data/*/squares/` and the other in  `data/*/squares_and_triangles/`.  That way, you can choose whichever you prefer!
 
 The `borders.csv` file behaves the same way in the `data/*/squares_and_triangles/` directory as it does in the `data/*/squares/` directory, explained above.  There is a slight difference when handling `cells.csv` however.
 
@@ -87,7 +87,7 @@ X,   Y,   CountryCode, LowerLeft, UpperRight, IncludeInSquares
 
 
 
-## 👩‍💻 Using The Data (Example Code) 
+## 👩‍💻 Using The Data (Example Code)
 
 ### Python
 <details>
@@ -135,7 +135,7 @@ ggplot()+
   labs(title = 'Fertility Rate by Country')
 ```
 
-#### Monte Carlo as a Viz is now Super Easy 
+#### Monte Carlo as a Viz is now Super Easy
 ```r
 library(data.table)
 library(ggplot2)
@@ -149,7 +149,7 @@ d <- as.data.table(wb_data(my_indicators, start_date = 2000, gapfill = TRUE, mrv
 cellsDT <- merge(cellsDT, d[date==2018, ], by.x='CountryCodeAlpha', by.y='iso3c', all.x=TRUE)
 
 cellsDT$rand <- runif(nrow(cellsDT))
-cellsDT[, hasInternet := 100*rand<int] 
+cellsDT[, hasInternet := 100*rand<int]
 ggplot()+
   theme_void()+
   geom_tile(data=cellsDT,   aes(x=X+0.5, y=Y+0.5, fill=hasInternet), color=NA)+
@@ -167,13 +167,13 @@ ggplot()+
 <summary>Click to Expand for Sample D3.js Code</summary>
 
 `TODO TODO TODO`
- 
+
 </details>
 
-## 📖 About this Repo 
+## 📖 About this Repo
 Certainly the main feature of this repository is the set of artifacts housed in the `data/` folder.
 
-There is however a small set of code in `src/` that assists in creating some of these data artifacts. 
+There is however a small set of code in `src/` that assists in creating some of these data artifacts.
 ```
                                                                 /squares_and_triangles
                                                                 |--- cells.csv
@@ -196,12 +196,12 @@ In `src/` you'll also find some code `plotTilingAccuracy.py` that compares count
 Well... it doesn't exist. The dataset was created by manually examining & transcribing the image.  I originally set out to automate most of this process, specifically, algorithmically determining the regional boundaries of each country (using the color of the source image) and mapping those to the lower-resolution grid.  However once I noticed that the original image had some _quirks_ (inconsistent size of grid-cells, inconsistent size of gridlines) - I determined it'd take me longer to write the code to handle all the corner-cases than it would take for me to just manually transcribe the map.  Plus, there's no feasible way to automate the _labeling_ (once the polygons are defined) of which polygon maps to which country, so that piece would always be manual.
 
 #### How can make a version of this for a different year?
-This is unfortunately not easy.  Imagine for a moment we wanted a similar version of this map for the year 2000.  There are a many countries where population has increased by more than 500,000 people from 2000 to 2018, this means that the 2000 map would need less cells. So which cells should we delete?  It's not obvious that there's a sensible way to do this. Then once we delete a cell, we'll need to push the adjacent coutries over to fill the new gap -- but how do we do that while maintaining the shape of the countries? It quickly becomes a logistical nightmare that would be difficult to solve (well) algorithmically.
+This is unfortunately not easy.  Imagine for a moment we wanted a similar version of this map for the year 2000.  There are a many countries where population has increased by more than 500,000 people from 2000 to 2018, this means that the 2000 map would need less cells. So which cells should we delete?  It's not obvious that there's a sensible way to do this. Then once we delete a cell, we'll need to push the adjacent countries over to fill the new gap -- but how do we do that while maintaining the shape of the countries? It quickly becomes a logistical nightmare that would be difficult to solve (well) algorithmically.
 
 If you come up with something you like, please create a **Pull Request** & I will consider adding it to this repo.
 
 #### How can make a version of this for a different cell-size (other than 500,000 persons/cell)?
-This is maybe a little more straigtforward than the above, but still challenging.
+This is maybe a little more straightforward than the above, but still challenging.
 
 I suspect a simple resampling of the image would get 90% of the way there.  Using something like [scipy.ndimage.zoom](http://scipy.github.io/devdocs/generated/scipy.ndimage.zoom.html#scipy.ndimage.zoom) with `mode='nearest'` will increase the change the resolution of the grid.  Then some manual attention would likely be needed to handle the nuances of country boundaries.
 
@@ -211,7 +211,7 @@ If you come up with something you like, please create a **Pull Request** & I wil
 It's over there. To the left. Further... keep going... further. Yep, there it is.
 
 #### Do the coordinates refer to Latitude & Longitude?
-No! Despite the fact that the values may appear to be in the same range as Lattiude and Longitude, this is purely a coincidence.  The exact values of the coordinate-system are completely arbitrary.  For this reason, I'd suggest always removing axis labels, tick marks, and any gridlines/graticule from visualization of this data.
+No! Despite the fact that the values may appear to be in the same range as Latiude and Longitude, this is purely a coincidence.  The exact values of the coordinate-system are completely arbitrary.  For this reason, I'd suggest always removing axis labels, tick marks, and any gridlines/graticule from visualization of this data.
 
 #### This thing looks so weird, why would I ever use it?
 Humans subconsiously find 'bigger things' more memorable and striking. So when seeing a graphic like this one of [Countries by System of Government](https://en.wikipedia.org/wiki/List_of_countries_by_system_of_government)
