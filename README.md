@@ -93,16 +93,15 @@ X,   Y,   CountryCode, LowerLeft, UpperRight, IncludeInSquares
 ### R
 
 ```R
-library(data.table)
 library(ggplot2)
-cellsDT   <- fread('https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares_and_triangles/cells.csv')
-bordersDT <- fread('https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares_and_triangles/borders.csv')
+cellsDF   <- read.csv('https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares_and_triangles/cells.csv')
+bordersDF <- read.csv('https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares_and_triangles/borders.csv')
 
 ggplot()+
   theme_void()+
   theme(legend.position = 'none')+
-  geom_tile(data=cellsDT,   aes(x=X+.5, y=Y+.5, fill=as.factor(CountryCode)), color="#ffffff")+
-  geom_path(data=bordersDT, aes(x=X, y=Y, group=PolygonID))+
+  geom_tile(data=cellsDF,   aes(x=X+.5, y=Y+.5, fill=as.factor(CountryCode)), color=NA)+
+  geom_path(data=bordersDF, aes(x=X, y=Y, group=PolygonID))+
   coord_fixed()
 ```
 
