@@ -123,7 +123,7 @@ plt.ylim([0, max(cells["Y"]+1)])
 n=cells.shape[0]
 patches = []
 for i in range(0,n):
-    patches.append(matplotlib.patches.Rectangle((cells.loc[i,"X"], cells.loc[i,"Y"]),1,1))
+    patches.append(matplotlib.patches.Rectangle((cells.loc[i,"X"]+.5, cells.loc[i,"Y"]+.5),1,1))
 ax.add_collection(PatchCollection(patches, color="#111111", alpha=0.1))
 for p in np.unique(borders["PolygonID"]):
     ax.plot(borders.loc[borders["PolygonID"]==p, "X"], borders.loc[borders["PolygonID"]==p, "Y"])
