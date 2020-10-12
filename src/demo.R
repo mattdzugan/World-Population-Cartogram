@@ -32,7 +32,8 @@ gg_map<-ggplot()+
   geom_path(data=bordersDT, aes(x=X, y=Y, group=PolygonID), size=0.25)+
   scale_fill_manual(values=rep(carto_pal(9,name = "Bold"), 100)) +
   coord_fixed()+
-  labs(title = 'World Population Cartogram')
+  labs(title = 'World Population Cartogram'
+       , caption = 'Max Roser (2018) – "The map we need if we want to think about how global living conditions are changing". Published online at OurWorldInData.org. Retrieved from: ‘https://ourworldindata.org/world-population-cartogram’ [Online Resource]')
 
 # fertility
 gg_frt<-ggplot()+
@@ -45,7 +46,8 @@ gg_frt<-ggplot()+
   geom_path(data=bordersDT, aes(x=X, y=Y, group=PolygonID), size=0.05, color="#ffffff")+
   coord_fixed()+
   scale_fill_carto_c(palette = 'Sunset')+
-  labs(title = 'Fertility Rate by Country')
+  labs(title = 'Fertility Rate by Country'
+       , caption = 'Max Roser (2018) – "The map we need if we want to think about how global living conditions are changing". Published online at OurWorldInData.org. Retrieved from: ‘https://ourworldindata.org/world-population-cartogram’ [Online Resource]')
 
 
 # energy
@@ -59,7 +61,8 @@ gg_enr<-ggplot()+
   geom_path(data=bordersDT, aes(x=X, y=Y, group=PolygonID), color="#2d3436", size=0.2)+
   scale_fill_manual(values=c('#dfe6e9','#78e08f','#b2bec3'))+
   coord_fixed()+
-  labs(title = 'Countries with at least 10% of Energy from Alternative Sources')
+  labs(title = 'Countries with at least 10% of Energy from Alternative Sources'
+       , caption = 'Max Roser (2018) – "The map we need if we want to think about how global living conditions are changing". Published online at OurWorldInData.org. Retrieved from: ‘https://ourworldindata.org/world-population-cartogram’ [Online Resource]')
 #scale_fill_viridis_c(option = 'A', direction = -1)
 
 
@@ -76,7 +79,8 @@ gg_int<-ggplot()+
   #geom_path(data=bordersDT, aes(x=X, y=Y, group=PolygonID), color="#0a3d62", size=0.2)+
   scale_fill_manual(values=c('#192a56','#00a8ff','#3c6382'))+
   coord_fixed()+
-  labs(title = 'Proportion of World with High-Speed Broadband')
+  labs(title = 'Proportion of World with High-Speed Broadband'
+       , caption = 'Max Roser (2018) – "The map we need if we want to think about how global living conditions are changing". Published online at OurWorldInData.org. Retrieved from: ‘https://ourworldindata.org/world-population-cartogram’ [Online Resource]')
 
 
 # numbeds
@@ -90,7 +94,8 @@ gg_bed<-ggplot()+
   scale_fill_manual(values = c("#ecf0f1","#f1c40f"))+
   geom_path(data=bordersDT, aes(x=X, y=Y, group=PolygonID), size=0.25, color='#34495e')+
   coord_fixed()+
-  labs(title = 'Less than 1 Hospital Bed per 1000 people')
+  labs(title = 'Less than 1 Hospital Bed per 1000 people'
+       , caption = 'Max Roser (2018) – "The map we need if we want to think about how global living conditions are changing". Published online at OurWorldInData.org. Retrieved from: ‘https://ourworldindata.org/world-population-cartogram’ [Online Resource]')
 
 
 
