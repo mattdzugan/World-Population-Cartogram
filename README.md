@@ -8,7 +8,7 @@ This repository contains a set of data able to reproduce [Max Roser](https://git
 - [Using the Data (Example Code)](#-using-the-data-example-code)
 - [About the Data and its Format](#-about-the-data-and-its-format)
 - [About this Repo](#-about-this-repo)
-- [FAQ](#-faq)
+- [FAQ](#%EF%B8%8F-faq)
 - [Citations](#-citations)
 - [License](#license)
 
