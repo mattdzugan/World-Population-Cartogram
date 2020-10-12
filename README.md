@@ -3,6 +3,15 @@ This repository contains a set of data able to reproduce [Max Roser](https://git
 
 <img src="https://ourworldindata.org/uploads/2018/09/Population-cartogram_World-2-e1538912000147-1536x587.png">
 
+**Table of Contents**
+- [Motivation](#-motivation)
+- [Using the Data (Example Code)](#-using-the-data-example-code)
+- [About the Data and its Format](#-about-the-data-and-its-format)
+- [About this Repo](#-about-this-repo)
+- [FAQ](#-faq)
+- [Citations](#-citations)
+- [License](#license)
+
 ## 🙌 Motivation
 From Wikipedia:
 > A cartogram is a map in which some thematic mapping variable – such as travel time, population, or GNP – is substituted for land area or distance
