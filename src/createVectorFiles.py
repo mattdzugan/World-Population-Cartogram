@@ -18,16 +18,21 @@ borderDF = borderDF.loc[borderDF['CountryCode']<23,:] # CountrCode 20 is breakin
 featureList = []
 for myCountryCode in np.unique(borderDF.CountryCode):
     myCountryDF = borderDF.loc[borderDF['CountryCode'] == myCountryCode, :]
-    myMultiPoly = []
+    # myMultiPoly = []
     for myPolygonID in np.unique(myCountryDF.PolygonID):
         print(str(myCountryCode)+", "+str(myPolygonID))
         myBorderDF = myCountryDF.loc[myCountryDF['PolygonID'] == myPolygonID, :]
-        myBorder = tuple((zip(myBorderDF.X/1000, myBorderDF.Y/1000)))
-        myMP = MultiPolygon([
-            ([myBorder]) # end of polygon
-        ])
-        myF = Feature(geometry=myMP, properties={"id": str(myPolygonID)})
-        featureList.append(myF)
+        #print(myBorderDF['BorderType'].values[0])
+        if (myBorderDF['BorderType'].values[0] == 'Exterior'):
+            #if (myCountryDF.shape[0] == 5):
+                #myBorderDF = myBorderDF.reindex(index=myBorderDF.index[::-1])
+            myBorderDF = myBorderDF.reindex(index=myBorderDF.index[::-1])
+            myBorder = tuple((zip(myBorderDF.X/1000, myBorderDF.Y/1000)))
+            myMP = MultiPolygon([
+                ([myBorder]) # end of polygon
+            ])
+            myF = Feature(geometry=myMP, properties={"id": str(myCountryCode)+'--'+str(myPolygonID)})
+            featureList.append(myF)
     #myMP = MultiPolygon([tuple(myMultiPoly)])
     #myMP = MultiPolygon(myMultiPoly)
     #myF  = Feature(geometry=myMP, properties={"country": str(myCountryCode)})
