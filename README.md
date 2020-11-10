@@ -65,39 +65,36 @@ plt.show()
 
 ### D3.js
 ```js
-cells = d3.csv("https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares/cells.csv", function(d){
-  return {
-    X : +d.X,
-    Y : +d.Y,
-    Country : d.CountryCode,
-  };
-})
+world_pop_cartogram = d3.json(
+  "https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/topojson/data/year_2018__cell_500k/squares/topo.json"
+)
 
-const xmin   = d3.min(cells, d => d.X);
-const xmax   = d3.max(cells, d => d.X)+1;
-const ymin   = d3.min(cells, d => d.Y);
-const ymax   = d3.max(cells, d => d.Y)+1;
-const height = width/(xmax-xmin)*(ymax-ymin);
-const svg    = d3.create("svg")
-                 .attr("viewBox", [0, 0, width, height])
-                 .style("background", "#ffffff");
+const svg = d3.create("svg").attr("viewBox", [0, 0, 1000, 500]);
+  const g = svg.append("g");
 
-var x     = d3.scaleLinear().domain([xmin, xmax]).range([0, width]);
-var y     = d3.scaleLinear().domain([ymin, ymax]).range([height, 0]);
-var color = d3.scaleOrdinal(['#7F3C8D','#11A579','#3969AC','#F2B701','#E73F74',
-                             '#80BA5A','#E68310','#008695','#CF1C90','#f97b72','#4b4b8f']);
+  const path = d3.geoPath();
+  const color = d3.scaleOrdinal([
+    '#66C5CC', '#F6CF71', '#F89C74', '#DCB0F2', '#87C55F', '#9EB9F3', '#FE88B1', '#C9DB74', '#8BE0A4', '#B497E7', '#D3B484'
+  ]);
 
-const cell = svg.selectAll("rect")
-                .data(cells)
-                .enter()
-                .append("rect")
-                .attr("x", d => x(d.X))
-                .attr("y", d => y(d.Y+1))
-                .style("stroke-width",1)
-                .style("stroke", d => color(d.Country))
-                .style("fill", d => color(d.Country))
-                .attr("height",y(0)-y(1))
-                .attr("width",x(1)-x(0));
+  const mycountries = topojson.feature(
+    world_pop_cartogram,
+    world_pop_cartogram.objects.countries
+  ).features;
+
+  g.append("g")
+    .selectAll("path")
+    .data(mycountries)
+    .join("path")
+    .attr("stroke", "#555")
+    .attr("stroke-width", 1.3333)
+    .attr("vector-effect", "non-scaling-stroke")
+    .attr("fill", (d, i) => color(i))
+    .attr("d", path);
+
+  svg.call(
+    d3.zoom().on("zoom", ({ transform }) => g.attr("transform", transform))
+  );
 ```
 
 
