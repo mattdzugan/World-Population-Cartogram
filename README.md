@@ -65,44 +65,36 @@ plt.show()
 
 ### D3.js
 ```js
-cells = d3.csv("https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/master/data/year_2018__cell_500k/squares/cells.csv", function(d){
-  return {
-    X : +d.X,
-    Y : +d.Y,
-    Country : d.CountryCode,
-  };
-})
+world_pop_cartogram = d3.json(
+  "https://raw.githubusercontent.com/mattdzugan/World-Population-Cartogram/topojson/data/year_2018__cell_500k/squares/topo.json"
+)
 
-const xmin   = d3.min(cells, d => d.X);
-const xmax   = d3.max(cells, d => d.X)+1;
-const ymin   = d3.min(cells, d => d.Y);
-const ymax   = d3.max(cells, d => d.Y)+1;
-const height = width/(xmax-xmin)*(ymax-ymin);
-const svg    = d3.create("svg")
-                 .attr("viewBox", [0, 0, width, height])
-                 .style("background", "#ffffff");
+const svg = d3.create("svg").attr("viewBox", [0, 0, 1000, 500]);
+const g = svg.append("g");
 
-var x     = d3.scaleLinear().domain([xmin, xmax]).range([0, width]);
-var y     = d3.scaleLinear().domain([ymin, ymax]).range([height, 0]);
-var color = d3.scaleOrdinal(['#7F3C8D','#11A579','#3969AC','#F2B701','#E73F74',
-                             '#80BA5A','#E68310','#008695','#CF1C90','#f97b72','#4b4b8f']);
+const path = d3.geoPath();
+const color = d3.scaleOrdinal([
+  '#66C5CC', '#F6CF71', '#F89C74', '#DCB0F2', '#87C55F', '#9EB9F3', '#FE88B1', '#C9DB74', '#8BE0A4', '#B497E7', '#D3B484'
+]);
 
-const cell = svg.selectAll("rect")
-                .data(cells)
-                .enter()
-                .append("rect")
-                .attr("x", d => x(d.X))
-                .attr("y", d => y(d.Y+1))
-                .style("stroke-width",1)
-                .style("stroke", d => color(d.Country))
-                .style("fill", d => color(d.Country))
-                .attr("height",y(0)-y(1))
-                .attr("width",x(1)-x(0));
+const mycountries = topojson.feature(
+  world_pop_cartogram,
+  world_pop_cartogram.objects.countries
+).features;
+
+g.append("g")
+  .selectAll("path")
+  .data(mycountries)
+  .join("path")
+  .attr("stroke", "#555")
+  .attr("stroke-width", 1.3333)
+  .attr("fill", (d, i) => color(i))
+  .attr("d", path);
 ```
 
 
 
-## 🔢 About the Data and its Format
+## 🔢 About the Data Artifacts and their Formats
 
 ### The Square Grid
 The cartogram is composed ~15,000 square* cells within a grid.  Each cell represents a population of 500,000 (0.5M) people who reside in its corresponding country.  This means that the only information necessary to represent the **World Population Cartogram** is a list of tuples: `{X, Y, Country}` describing which cells map to which countries.  To avoid dealing with spelling mismatches and other localization glitches, this repo uses [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country codes to identify countries.
@@ -149,7 +141,59 @@ It should be noted that the borders are not `cells` themselves. They do not "tak
 Using them together introduces one slight complication:
 Each `cell` is technically a region itself, a 1x1 rectangle.  The `cells.csv` however only represents it as a single `{X,Y}` point.  **The convention here is that a `cell`'s `{X,Y}` coordinate is specifically referring to its lower-left (south-west) corner.**  For example, a single-`cell` Country at `{X=100, Y=200}` would have a `border` of `[{X=100, Y=200}, {X=101, Y=200}, {X=101, Y=201}, {X=100, Y=201}]`
 
+#### countries.svg
+`countries.svg` is a pre-computed vector file the cartogram. Styling is minimal so as not to presuppose any design decisions.
+<img src="./data/year_2018__cell_500k/squares/countries.svg">
 
+#### geo.json & topo.json
+`geo.json` is JSON file that obeys the [geojson](https://geojson.org/) specification  for describing geographic data. It's essentially an array of `Features` where each `Feature` maps to a `Country`.  Note that the `properties.id` describes the same [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) country code used in the other files.
+
+```
+{
+	"type": "FeatureCollection",
+	"features": [{
+		"type": "Feature",
+		"geometry": {
+			"type": "MultiPolygon",
+			"coordinates": [
+				[
+					[
+						[0.163, 0.084],
+						[0.163, 0.085], // ... <TRUNCATED FOR README>
+						[0.163, 0.084]
+					]
+				],
+				[
+					[
+						[0.153, 0.092],
+						[0.153, 0.091], // ... <TRUNCATED FOR README>
+						[0.153, 0.092]
+					]
+				]
+			]
+		},
+		"properties": {
+			"id": "792"
+		}
+	}, {
+		"type": "Feature",
+		"geometry": {
+			"type": "Polygon",
+			"coordinates": [
+				[
+					[0.157, 0.082],
+					[0.156, 0.082], // ... <TRUNCATED FOR README>
+					[0.157, 0.082]
+				]
+			]
+		},
+		"properties": {
+			"id": "196"
+		}
+	}, {
+```
+
+`topo.json` is a relative of the `geo.json` file which has several advantages like simplified polygons, reused borders, and an inferred topology.  This file type is popular in the `D3.js` community, you can see it in action in [this notebook](https://observablehq.com/@mattdzugan/border-only-hello-world-population-cartogram).
 
 ### Triangles...?
 Because of the fact that there are a handful of (mostly island) nations with a population less than the 500,000 cell-size, these countries being represented by a full square cell can be a little misleading.  Max Roser's Cartogram addresses this by carving out a special type of cell just for this, a half-filled cell in the shape of a triangle.  Just look in the [Carribean](https://ourworldindata.org/uploads/2018/09/Population-cartogram_Americas-768x978.png) or the [South-Pacific](https://ourworldindata.org/uploads/2018/09/Population-cartogram_Asia-and-Oceania-768x531.png) for a few examples of these triangles.
@@ -160,7 +204,7 @@ Plus, the triangles don't really help all that much in making the area directly 
 
 Because it really just comes down to personal preference, two versions of the data are made available. One in `data/*/squares/` and the other in  `data/*/squares_and_triangles/`.  That way, you can choose whichever you prefer!
 
-The `borders.csv` file behaves the same way in the `data/*/squares_and_triangles/` directory as it does in the `data/*/squares/` directory, explained above.  There is a slight difference when handling `cells.csv` however.
+The `borders.csv` file, the `countries.svg` file and any of the `*.json` files behave the same way in the `data/*/squares_and_triangles/` directory as they do in the `data/*/squares/` directory, explained above.  There is a slight difference when handling `cells.csv` however...
 
 Because a single square-cell can now contain two triangles, we need a way to identify that. Thus, `boolean` columns: `LowerLeft` and `UpperRight` are introduced.
 ```
@@ -188,7 +232,7 @@ Well... it doesn't exist. The dataset was created by manually examining & transc
 #### How can make a version of this for a different year?
 This is unfortunately not easy.  Imagine for a moment we wanted a similar version of this map for the year 2000.  There are a many countries where population has increased by more than 500,000 people from 2000 to 2018, this means that the 2000 map would need less cells. So which cells should we delete?  It's not obvious that there's a sensible way to do this. Then once we delete a cell, we'll need to push the adjacent countries over to fill the new gap -- but how do we do that while maintaining the shape of the countries? It quickly becomes a logistical nightmare that would be difficult to solve (well) algorithmically.
 
-If you come up with something you like, please create a **Pull Request** & I will consider adding it to this repo.
+If you come up with something you like, please create a **Pull Request** & I will consider adding it to this repo. More details are available in the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
 
 #### How can make a version of this for a different cell-size (other than 500,000 persons/cell)?
 This is maybe a little more straightforward than the above, but still challenging.
